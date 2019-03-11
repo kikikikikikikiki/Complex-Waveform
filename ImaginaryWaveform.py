@@ -1,5 +1,4 @@
 import pygame
-#import math
 import pyaudio
 import numpy as np
 import time
@@ -11,7 +10,7 @@ from video import make_video
 pygame.init()   
 
 surface_size = 1000
-main_surface = pygame.display.set_mode((1600,900),pygame.DOUBLEBUF+pygame.FULLSCREEN)
+main_surface = pygame.display.set_mode((1000,1000),pygame.DOUBLEBUF)
 my_clock = pygame.time.Clock()
 
 lru_cache(maxsize=None)
@@ -27,15 +26,12 @@ def draw_tree(inord, order, theta, thetab, sz, posn, heading, color=(0,0,0), dep
    
    (u, v) = posn
    newpos = (u + delta_x, v + delta_y)
+   #Draw final end
    #if order==1:
+   
    #Draw all 
    if True:
-      #pygame.draw.line(main_surface, color, posn, posn, 1)
       pygame.draw.line(main_surface, color, newpos, newpos, 1)
-      #pygame.draw.circle(main_surface, color, (int(posn[0]),int(posn[1])),1,1)#int(1*math.fabs(math.sin((heading*400/400).real))),int(1*math.fabs(math.sin((heading*400/400).real))))
-      #pygame.draw.circle(main_surface, color, (int(newpos[0]),int(newpos[1])),1,1)#int(1*math.fabs(math.sin((heading*400/400).real))),int(1*math.fabs(math.sin((heading*400/400).real))))
-      #pygame.draw.circle(main_surface, color, (int(posn[0]),int(newpos[1])),1,1)
-      #pygame.draw.circle(main_surface, color, (int(newpos[0]),int(posn[1])),1,1)
    
    gradd  = 128+(127*(np.cos((heading*1j).imag)))
    gradd2 = 128+(127*(np.sin((heading).real)))
@@ -46,12 +42,8 @@ def draw_tree(inord, order, theta, thetab, sz, posn, heading, color=(0,0,0), dep
    
 
    if order > 0:
-      if depth == 0:
-          color1 = (gradd,0,gradd3)
-          color2 = (gradd,0,gradd3)
-      else:
-          color1 = (gradd,gradd2,gradd3)
-          color2 = (gradd,gradd2,gradd3)
+      color1 = (gradd,gradd2,gradd3)
+      color2 = (gradd,gradd2,gradd3)
 
       newsz = sz*(1 - trunk_ratio)
       draw_tree(inord, order-1, theta, thetab, newsz, newpos, (heading+theta+12j), color1, depth)
@@ -72,33 +64,29 @@ def gameloop():
     save_screen = make_video(main_surface)
     
     wf = wave.open('long.wav', 'rb')
-    song = wave.open('fish.wav', 'rb')
-    song2 = wave.open('10simm.wav', 'rb')
+    song = wave.open('10simm.wav', 'rb')
     p = pyaudio.PyAudio()
 
     main_surface.fill((0, 0, 0))
     
    
     def callback(in_data, frame_count, time_info, status):
-       #pygame.display.flip()
-       #my_clock.tick(24)
-       next(save_screen)
+       #Uncomment to output frames
+       #next(save_screen)
        data = wf.readframes(frame_count)
        data2 = song.readframes(frame_count)
-       data3 = song2.readframes(frame_count)
        
        decoded = np.fromstring(data, dtype=np.int32)
-       decoded3 = np.fromstring(data2, dtype=np.int32)
-       decoded4 = np.fromstring(data3, dtype=np.int32)
-       decoded_oh = decoded[::]
+       decoded2 = np.fromstring(data2, dtype=np.int32)
+       
        if np.fabs(decoded[0]) > 0:
            if np.fabs(decoded[1]) > 0:
-               for i,j,l in zip(decoded_oh,decoded3,decoded4):
+               for i,l in zip(decoded,decoded2):
                   
                   theta1 = (2*np.pi*(i/2147483647))
                   theta2 = np.cos(2*np.pi*(np.exp((l/50)/2147483647)))+np.sin(-2*np.pi*(np.exp((l/50)/2147483647)))
 
-                  draw_tree(inord,2, theta1, theta2, surface_size*0.3*(i/2147483647), (800,450), (i/2147483647)*np.pi*(np.exp((l/50)/2147483647)))
+                  draw_tree(inord,2, theta1, theta2, surface_size*0.3*(i/2147483647), (500,500), (i/2147483647)*np.pi*(np.exp((l/50)/2147483647)))
 
        return (data, pyaudio.paContinue)
       
